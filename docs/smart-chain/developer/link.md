@@ -1,10 +1,14 @@
 # Binance Smart Chain Price Feeds from Chainlink
 
-## Introduction to Price Feeds
+[SUGGEST EDITS](https://docs.chain.link/docs/binance-smart-chain-price-feeds)
 
-Chainlink Price Feeds are the quickest way to connect your smart contracts to the real-world market prices of assets. They enable smart contracts to retrieve the latest price of an asset in a single call.
+##Introduction to Price Feeds
+
+Chainlink Pr ice Feeds are the quickest way to connect your smart contracts to the real-world market prices of assets. They enable smart contracts to retrieve the latest price of an asset in a single call.
 
 Often, smart contracts need to act upon prices of assets in real-time. This is especially true in [DeFi](https://defi.chain.link/). For example, [Synthetix](https://www.synthetix.io/) use Price Feeds to determine prices on their derivatives platform. Lending and Borrowing platforms like [AAVE](https://aave.com/) use Price Feeds to ensure the total value of the collateral.
+
+
 
 ## Get the Latest Price
 
@@ -12,56 +16,96 @@ This section explains how to get the latest price of BNB inside smart contracts 
 
 **Solidity Contract**
 
-To consume price data, your smart contract should reference <a href="https://github.com/smartcontractkit/chainlink/blob/master/evm-contracts/src/v0.6/interfaces/AggregatorV3Interface.sol" target="_blank">`AggregatorV3Interface`</a>, which defines the external functions implemented by Price Feeds.
+To consume price data, your smart contract should reference [AggregatorInterface](https://github.com/smartcontractkit/chainlink/blob/master/evm-contracts/src/v0.6/interfaces/AggregatorInterface.sol), which defines the external functions implemented by Price Feeds.
+
+As long as the address provided is a Chainlink aggregator, your smart contract will be able to retrieve the latest price from it.
 
 ```
 pragma solidity ^0.6.7;
 
-import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 
-contract PriceConsumerV3 {
+import "@chainlink/contracts/src/v0.6/interfaces/AggregatorInterface.sol";
 
-    AggregatorV3Interface internal priceFeed;
 
-    /**
-     * Network: Binance Smart Chain
-     * Aggregator: BNB/USD
-     * Address: 0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE
-     */
-    constructor() public {
-        priceFeed = AggregatorV3Interface(0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE);
-    }
 
-    /**
-     * Returns the latest price
-     */
-    function getLatestPrice() public view returns (int) {
-        (
-            uint80 roundID, 
-            int price,
-            uint startedAt,
-            uint timeStamp,
-            uint80 answeredInRound
-        ) = priceFeed.latestRoundData();
-        return price;
-    }
+contract PriceConsumer {
+
+
+
+  AggregatorInterface internal priceFeed;
+
+
+
+  /**
+
+   \* Network: Binance Smart Chain
+
+   \* Aggregator: BNB/USD
+
+   \* Address: 0x859AAa51961284C94d970B47E82b8771942F1980
+
+   */
+
+  constructor() public {
+
+​    priceFeed = AggregatorInterface(0x859AAa51961284C94d970B47E82b8771942F1980);
+
+  }
+
+
+
+  /**
+
+   \* Returns the latest price
+
+   */
+
+  function getLatestPrice() public view returns (int256) {
+
+​    return priceFeed.latestAnswer();
+
+  }
+
+
+
+  /**
+
+   \* Returns the timestamp of the latest price update
+
+   */
+
+  function getLatestPriceTimestamp() public view returns (uint256) {
+
+​    return priceFeed.latestTimestamp();
+
+  }
+
 }
-
 ```
 
 **Javascript Web3**
 
 ```javascript
+
 const Web3 = require("web3");
+
 const web3 = new Web3("https://data-seed-prebsc-1-s1.binance.org:8545");
-const aggregatorV3InterfaceABI = [{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"description","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint80","name":"_roundId","type":"uint80"}],"name":"getRoundData","outputs":[{"internalType":"uint80","name":"roundId","type":"uint80"},{"internalType":"int256","name":"answer","type":"int256"},{"internalType":"uint256","name":"startedAt","type":"uint256"},{"internalType":"uint256","name":"updatedAt","type":"uint256"},{"internalType":"uint80","name":"answeredInRound","type":"uint80"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestRoundData","outputs":[{"internalType":"uint80","name":"roundId","type":"uint80"},{"internalType":"int256","name":"answer","type":"int256"},{"internalType":"uint256","name":"startedAt","type":"uint256"},{"internalType":"uint256","name":"updatedAt","type":"uint256"},{"internalType":"uint80","name":"answeredInRound","type":"uint80"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"version","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
-const addr = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
-const priceFeed = new web3.eth.Contract(aggregatorV3InterfaceABI, addr);
-priceFeed.methods.latestRoundData().call()
-    .then((roundData) => {
-        // Do something with roundData
-        console.log("Latest Round Data", roundData)
-    });
+
+const aggregatorInterfaceABI = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"int256","name":"current","type":"int256"},{"indexed":true,"internalType":"uint256","name":"roundId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"AnswerUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"roundId","type":"uint256"},{"indexed":true,"internalType":"address","name":"startedBy","type":"address"},{"indexed":false,"internalType":"uint256","name":"startedAt","type":"uint256"}],"name":"NewRound","type":"event"},{"inputs":[{"internalType":"uint256","name":"roundId","type":"uint256"}],"name":"getAnswer","outputs":[{"internalType":"int256","name":"","type":"int256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"roundId","type":"uint256"}],"name":"getTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestAnswer","outputs":[{"internalType":"int256","name":"","type":"int256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestRound","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
+
+const addr = "0x859AAa51961284C94d970B47E82b8771942F1980";
+
+const priceFeed = new web3.eth.Contract(aggregatorInterfaceABI, addr);
+
+priceFeed.methods.latestAnswer().call()
+
+  .then((price) => {
+
+​    //Do something with price
+
+​    console.log(price)
+
+  });
 
 ```
 
@@ -69,56 +113,98 @@ priceFeed.methods.latestRoundData().call()
 
 ```python
 from web3 import Web3
+
 web3 = Web3(Web3.HTTPProvider('https://data-seed-prebsc-1-s1.binance.org:8545'))
-abi = '[{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"description","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint80","name":"_roundId","type":"uint80"}],"name":"getRoundData","outputs":[{"internalType":"uint80","name":"roundId","type":"uint80"},{"internalType":"int256","name":"answer","type":"int256"},{"internalType":"uint256","name":"startedAt","type":"uint256"},{"internalType":"uint256","name":"updatedAt","type":"uint256"},{"internalType":"uint80","name":"answeredInRound","type":"uint80"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestRoundData","outputs":[{"internalType":"uint80","name":"roundId","type":"uint80"},{"internalType":"int256","name":"answer","type":"int256"},{"internalType":"uint256","name":"startedAt","type":"uint256"},{"internalType":"uint256","name":"updatedAt","type":"uint256"},{"internalType":"uint80","name":"answeredInRound","type":"uint80"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"version","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]'
-addr = '0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE'
+
+abi = '[{"anonymous":false,"inputs":[{"indexed":true,"internalType":"int256","name":"current","type":"int256"},{"indexed":true,"internalType":"uint256","name":"roundId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"AnswerUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"roundId","type":"uint256"},{"indexed":true,"internalType":"address","name":"startedBy","type":"address"},{"indexed":false,"internalType":"uint256","name":"startedAt","type":"uint256"}],"name":"NewRound","type":"event"},{"inputs":[{"internalType":"uint256","name":"roundId","type":"uint256"}],"name":"getAnswer","outputs":[{"internalType":"int256","name":"","type":"int256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"roundId","type":"uint256"}],"name":"getTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestAnswer","outputs":[{"internalType":"int256","name":"","type":"int256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestRound","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]'
+
+addr = '0x859AAa51961284C94d970B47E82b8771942F1980'
+
 contract = web3.eth.contract(address=addr, abi=abi)
-latestData = contract.functions.latestRoundData().call()
-print(latestData)
+
+latestPrice = contract.functions.latestAnswer().call()
+
+print(latestPrice)
 ```
 
 
 ## Get Historical Price Data
 
-The most common use case for Price Feeds is to get the latest price. However, <a href="https://github.com/smartcontractkit/chainlink/blob/master/evm-contracts/src/v0.6/interfaces/AggregatorV3Interface.sol" target="_blank" rel="noreferrer, noopener">`AggregatorV3Interface`</a> also exposes functions which can be used to retrieve price data of a previous round ID.
+The most common use case for Price Feeds is to get the latest price. However, [AggregatorInterface](https://github.com/smartcontractkit/chainlink/blob/master/evm-contracts/src/v0.6/interfaces/AggregatorInterface.sol) also exposes functions which can be used to retrieve historical price data.
+
+This section explains how to get historical price data for BNB using Chainlink Price Feeds, on the Binance Smart Chain.
 
 **Solidity Contract**
 
 ```
 pragma solidity ^0.6.7;
 
-import "https://github.com/smartcontractkit/chainlink/blob/master/evm-contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 
-contract HistoricalPriceConsumerV3 {
 
-    AggregatorV3Interface internal priceFeed;
-    
-    /**
-     * Network: Binance Smart Chain
-     * Aggregator: BNB/USD
-     * Address: 0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE
-     */
-    constructor() public {
-        priceFeed = AggregatorV3Interface(0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE);
-    }
+import "@chainlink/contracts/src/v0.6/interfaces/AggregatorInterface.sol";
 
-    /**
-     * Returns historical price for a round id.
-     * roundId is NOT incremental. Not all roundIds are valid.
-     * You must know a valid roundId before consuming historical data. 
-     * @dev A timestamp with zero value means the round is not complete and should not be used.
-     */
-    function getHistoricalPrice(uint80 roundId) public view returns (int256) {
-        (
-            uint80 id, 
-            int price,
-            uint startedAt,
-            uint timeStamp,
-            uint80 answeredInRound
-        ) = priceFeed.getRoundData(roundId);
-        require(timeStamp > 0, "Round not complete");
-        return price;
-    }
+
+
+contract PriceConsumer {
+
+
+
+  AggregatorInterface internal priceFeed;
+
+
+
+  /**
+
+   \* Network: Binance Smart Chain
+
+   \* Aggregator: BNB/USD
+
+   \* Address: 0x859AAa51961284C94d970B47E82b8771942F1980
+
+   */
+
+  constructor() public {
+
+​    priceFeed = AggregatorInterface(0x859AAa51961284C94d970B47E82b8771942F1980);
+
+  }
+
+
+
+  /**
+
+   \* Returns historical data from previous update rounds
+
+   */
+
+  function getPreviousPrice(uint256 _back) public view returns (int256) {
+
+​    uint256 latest = priceFeed.latestRound();
+
+​    require(_back <= latest, "Not enough history");
+
+​    return priceFeed.getAnswer(latest - _back);
+
+  }
+
+
+
+  /**
+
+   \* Returns historical data from previous update rounds
+
+   */
+
+  function getPreviousPriceTimestamp(uint256 _back) public view returns (uint256) {
+
+​    uint256 latest = priceFeed.latestRound();
+
+​    require(_back <= latest, "Not enough history");
+
+​    return priceFeed.getTimestamp(latest - _back);
+
+  }
+
 }
 ```
 **Javascript Web3**
@@ -128,18 +214,32 @@ contract HistoricalPriceConsumerV3 {
 const Web3 = require("web3");
 
 const web3 = new Web3("https://data-seed-prebsc-1-s1.binance.org:8545");
-const aggregatorV3InterfaceABI = [{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"description","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint80","name":"_roundId","type":"uint80"}],"name":"getRoundData","outputs":[{"internalType":"uint80","name":"roundId","type":"uint80"},{"internalType":"int256","name":"answer","type":"int256"},{"internalType":"uint256","name":"startedAt","type":"uint256"},{"internalType":"uint256","name":"updatedAt","type":"uint256"},{"internalType":"uint80","name":"answeredInRound","type":"uint80"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestRoundData","outputs":[{"internalType":"uint80","name":"roundId","type":"uint80"},{"internalType":"int256","name":"answer","type":"int256"},{"internalType":"uint256","name":"startedAt","type":"uint256"},{"internalType":"uint256","name":"updatedAt","type":"uint256"},{"internalType":"uint80","name":"answeredInRound","type":"uint80"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"version","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
-const addr = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
-const priceFeed = new web3.eth.Contract(aggregatorV3InterfaceABI, addr);
 
-// Valid roundId must be known. They are NOT incremental.
-let validId = BigInt("18446744073709554130");
+const aggregatorInterfaceABI = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"int256","name":"current","type":"int256"},{"indexed":true,"internalType":"uint256","name":"roundId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"AnswerUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"roundId","type":"uint256"},{"indexed":true,"internalType":"address","name":"startedBy","type":"address"},{"indexed":false,"internalType":"uint256","name":"startedAt","type":"uint256"}],"name":"NewRound","type":"event"},{"inputs":[{"internalType":"uint256","name":"roundId","type":"uint256"}],"name":"getAnswer","outputs":[{"internalType":"int256","name":"","type":"int256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"roundId","type":"uint256"}],"name":"getTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestAnswer","outputs":[{"internalType":"int256","name":"","type":"int256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestRound","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
 
-priceFeed.methods.getRoundData(validId).call()
-    .then((historicalRoundData) => {
-        // Do something with price
-        console.log("Historical round data", historicalRoundData);
-    })
+const addr = "0x859AAa51961284C94d970B47E82b8771942F1980";
+
+const priceFeed = new web3.eth.Contract(aggregatorInterfaceABI, addr);
+
+priceFeed.methods.latestRound().call()
+
+  .then((roundId) => {
+
+​    // Go 5 rounds back in history
+
+​    let historicalRoundId = roundId - 5;
+
+​    priceFeed.methods.getAnswer(historicalRoundId).call()
+
+​      .then((price) => {
+
+​        // Do something with price
+
+​        console.log("Historical price", price);
+
+​      });
+
+  });
 ```
 
 **Python Web3**
@@ -148,117 +248,107 @@ priceFeed.methods.getRoundData(validId).call()
 from web3 import Web3
 
 web3 = Web3(Web3.HTTPProvider('https://data-seed-prebsc-1-s1.binance.org:8545'))
-abi = '[{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"description","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint80","name":"_roundId","type":"uint80"}],"name":"getRoundData","outputs":[{"internalType":"uint80","name":"roundId","type":"uint80"},{"internalType":"int256","name":"answer","type":"int256"},{"internalType":"uint256","name":"startedAt","type":"uint256"},{"internalType":"uint256","name":"updatedAt","type":"uint256"},{"internalType":"uint80","name":"answeredInRound","type":"uint80"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestRoundData","outputs":[{"internalType":"uint80","name":"roundId","type":"uint80"},{"internalType":"int256","name":"answer","type":"int256"},{"internalType":"uint256","name":"startedAt","type":"uint256"},{"internalType":"uint256","name":"updatedAt","type":"uint256"},{"internalType":"uint80","name":"answeredInRound","type":"uint80"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"version","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]'
-addr = '0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE'
+
+abi = '[{"anonymous":false,"inputs":[{"indexed":true,"internalType":"int256","name":"current","type":"int256"},{"indexed":true,"internalType":"uint256","name":"roundId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"AnswerUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"roundId","type":"uint256"},{"indexed":true,"internalType":"address","name":"startedBy","type":"address"},{"indexed":false,"internalType":"uint256","name":"startedAt","type":"uint256"}],"name":"NewRound","type":"event"},{"inputs":[{"internalType":"uint256","name":"roundId","type":"uint256"}],"name":"getAnswer","outputs":[{"internalType":"int256","name":"","type":"int256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"roundId","type":"uint256"}],"name":"getTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestAnswer","outputs":[{"internalType":"int256","name":"","type":"int256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestRound","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"latestTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]'
+
+addr = '0x859AAa51961284C94d970B47E82b8771942F1980'
+
 contract = web3.eth.contract(address=addr, abi=abi)
 
-#  Valid roundId must be known. They are NOT incremental.
-validRoundId = 18446744073709554130
+latestRound = contract.functions.latestRound().call()
 
-historicalData = contract.functions.getRoundData(validRoundId).call()
-print(historicalData)
+# Go 5 rounds back
+
+historicalRoundId = latestRound - 5
+
+historicalPrice = contract.functions.getAnswer(historicalRoundId).call()
+
+print("Historical Price", historicalPrice)
 ```
 
 
 ## API Reference
 
-API reference for <a href="https://github.com/smartcontractkit/chainlink/blob/develop/evm-contracts/src/v0.6/interfaces/AggregatorV3Interface.sol" target="_blank">`AggregatorV3Interface`</a>.
+API reference for [AggregatorInterface](https://github.com/smartcontractkit/chainlink/blob/master/evm-contracts/src/v0.6/interfaces/AggregatorInterface.sol).
 
-### Functions
+**Functions**
 
-|Name|Description|
-|---|---|
-|[decimals](#decimals)|The number of decimals in the response.|
-|[description](#description)|The description of the aggregator that the proxy points to.|
-|[getRoundData](#getrounddata)|Get data from a specific round.|
-|[latestRoundData](#latestrounddata)|Get data from the latest round.|
-|[version](#version)|The version representing the type of aggregator the proxy points to.|
+| **Name**                                                     | **Description**                                    |
+| ------------------------------------------------------------ | -------------------------------------------------- |
+| [latestAnswer](https://docs.chain.link/docs/binance-smart-chain-price-feeds#latestanswer) | Get the latest price.                              |
+| [latestTimestamp](https://docs.chain.link/docs/binance-smart-chain-price-feeds#latesttimestamp) | Get the time that the price feed was last updated. |
+| [latestRound](https://docs.chain.link/docs/binance-smart-chain-price-feeds#latestround) | Get the round id.                                  |
+| [getAnswer](https://docs.chain.link/docs/binance-smart-chain-price-feeds#getanswer) | Get the price from a specific round.               |
+| [getTimestamp](https://docs.chain.link/docs/binance-smart-chain-price-feeds#gettimestamp) | Get the timestamp of a specific round.             |
 
-___
+**latestAnswer**
 
-#### decimals
+Get the latest price.
 
-Get the number of decimals present in the response value.
+function latestAnswer() external view returns (int256)
 
-```javascript Solidity
-function decimals() external view returns (uint8)
-```
+- RETURN:     The latest price.
 
-* `RETURN`: The number of decimals.
+**latestTimestamp**
 
-#### description
+Get the time that the price feed was last updated.
 
-Get the description of the underlying aggregator that the proxy points to.
+function latestTimestamp() external view returns (uint256)
 
-```javascript Solidity
-function description() external view returns (string memory)
-```
+- RETURN:     The timestamp of the latest update.
 
-* `RETURN`: The description of the underlying aggregator.
+**latestRound**
 
-#### getRoundData
+Get the round id, an unsigned integer representing that latest update that increments with every update.
 
-Get data about a specific round, using the `roundId`.
+function latestRound() external view returns (uint256)
 
-```javascript Solidity
-function getRoundData(uint80 _roundId) external view 
-    returns (
-        uint80 roundId, 
-        int256 answer, 
-        uint256 startedAt, 
-        uint256 updatedAt, 
-        uint80 answeredInRound
-    )
-```
+- RETURN:     The latest round id.
 
-**Parameters**
+**getAnswer**
 
-* `roundId`: The round ID
+Get the price from a specific round.
 
-**Return Values**
+function getAnswer(uint256 roundId) external view returns (int256)
 
-* `roundId`: The round ID.
-* `answer`: The price.
-* `startedAt`: Timestamp of when the round started.
-* `updatedAt`: Timestamp of when the round was updated.
-* `answeredInRound`: The round ID of the round in which the answer
-   * was computed.
+- roundId:     The round id.
+- RETURN:     The price from that round.
 
-#### latestRoundData
+**getTimestamp**
 
-Get the price from the latest round.
+Get the timestamp of a specific round.
 
-```javascript Solidity
-function latestRoundData() external view 
-    returns (
-        uint80 roundId, 
-        int256 answer, 
-        uint256 startedAt, 
-        uint256 updatedAt, 
-        uint80 answeredInRound
-    )
-```
+function getTimestamp(uint256 roundId) external view returns (uint256)
 
-**Return Values**
+- roundId:     The round id.
+- RETURN:     The timestamp from that round.
 
-* `roundId`: The round ID.
-* `answer`: The price.
-* `startedAt`: Timestamp of when the round started.
-* `updatedAt`: Timestamp of when the round was updated.
-* `answeredInRound`: The round ID of the round in which the answer
-   * was computed.
+**Events**
 
-#### version
+| **Name**                                                     | **Description**                      |
+| ------------------------------------------------------------ | ------------------------------------ |
+| [AnswerUpdated](https://docs.chain.link/docs/binance-smart-chain-price-feeds#answerupdated) | Emitted when the answer is updated.  |
+| [NewRound](https://docs.chain.link/docs/binance-smart-chain-price-feeds#newround) | Emitted when a new round is started. |
 
-The version representing the type of aggregator the proxy points to.
+**AnswerUpdated**
 
-```javascript Solidity
-function version() external view returns (uint256)
-```
+Emitted when the answer is updated.
 
-* `RETURN`: The version number.
+event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 timestamp)
 
-___
+- current:     The updated price.
+- roundId:     The round id.
+- timestamp:     The time at which the answer was updated.
+
+**NewRound**
+
+Emitted when a new round is started.
+
+event NewRound(uint256 indexed roundId, address indexed startedBy, uint256 startedAt)
+
+- roundId:     The new round id.
+- startedBy:     The address which starts the new round.
+- startedAt:     The time the new round was started.
 
 
 
@@ -266,9 +356,5 @@ ___
 
 Chainlink price feed contracts are updated on a regular basis by multiple Chainlink nodes. This section lists the contract addresses for Price Feeds on the Binance Smart Chain.
 
-### Mainnet
 
-|Pair|Contract|
-|:---|:---|
-|BNB / USD|<a href='https://bscscan.com/address/0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE' target='_blank' rel='noreferrer, noopener'>`0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE`</a>|
 
